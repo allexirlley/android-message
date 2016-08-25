@@ -64,7 +64,7 @@
         android:layout_alignBottom="@+id/edtDDD"
         android:layout_toRightOf="@+id/edtDDD"
         android:layout_toEndOf="@+id/edtDDD"
-        android:hint="999999999"
+        android:hint="99999-9999"
         android:textColor="@color/textColorPrimary" />
 
     <Button
