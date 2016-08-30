@@ -1,7 +1,9 @@
 package tporto.com.message;
 
+import android.Manifest;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,17 +13,23 @@ import com.github.rtoshiro.util.format.text.MaskTextWatcher;
 
 import java.util.Random;
 
+import tporto.com.message.helper.Permissao;
 import tporto.com.message.helper.Preferencias;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText telefone, codpais, codigo, ddd, nome;
     private Button btnCadastrar;
+    private String[] permissoes = new String[]{
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.INTERNET
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Permissao.validarPermissao(1,this,permissoes);
 
         nome     = (EditText) findViewById(R.id.edtNome);
         telefone = (EditText) findViewById(R.id.edtNumero);
@@ -52,10 +60,25 @@ public class LoginActivity extends AppCompatActivity {
                 Random random = new Random();
                 int numero    = random.nextInt(9999-1000)+1000;
                 String token  = String.valueOf(numero);
+                String msgEnvio = "Message Código de confirmação: "+token;
 
                 Preferencias preferencias = new Preferencias(LoginActivity.this);
                 preferencias.salvarUsuario(usuario,telefoneSemFormatacao,token);
+
+                telefoneSemFormatacao = "5554";
+                boolean enviado = envioSMS("+"+telefoneSemFormatacao,msgEnvio);
             }
         });
+    }
+
+    private boolean envioSMS(String telefone, String msg){
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(telefone,null,msg,null,null);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }
