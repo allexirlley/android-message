@@ -1,28 +1,31 @@
 package tporto.com.message.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.firebase.client.Firebase;
-
-import tporto.com.message.application.ConfiguracaoFirebase;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
  * Created by tportopc on 31/08/16.
  */
-@JsonIgnoreProperties({"id","senha"})
+@IgnoreExtraProperties
 public class Usuario {
 
+    private DatabaseReference mDatabase;
+
+    //@Exclude
     private String id;
     private String nome;
     private String email;
+    //@Exclude
     private String senha;
 
     public Usuario() {
     }
 
     public void salvar(){
-        Firebase firebase = ConfiguracaoFirebase.getFirebase();
-        firebase = firebase.child("usuarios").child(getId());
-        firebase.setValue(this);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.child("usuarios").child(getId()).setValue(this);
     }
 
     public String getId() {

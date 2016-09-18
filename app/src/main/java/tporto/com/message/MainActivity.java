@@ -1,6 +1,8 @@
 package tporto.com.message;
 
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -8,25 +10,35 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.firebase.client.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
 
-import tporto.com.message.application.ConfiguracaoFirebase;
+import tporto.com.message.adapter.TabAdapter;
+import tporto.com.message.helper.SlidingTabLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Firebase firebase;
     private Toolbar toolbar;
+    private SlidingTabLayout tabLayout;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        firebase = ConfiguracaoFirebase.getFirebase();
-
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Message");
         setSupportActionBar(toolbar);
+
+        tabLayout = (SlidingTabLayout) findViewById(R.id.stl_tabs);
+        viewPager = (ViewPager) findViewById(R.id.vp_pagina);
+        tabLayout.setDistributeEvenly(true);
+        tabLayout.setSelectedIndicatorColors(ContextCompat.getColor(this,R.color.colorAccent));
+
+        //configurar adapter
+        TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(tabAdapter);
+        tabLayout.setViewPager(viewPager);
     }
 
     @Override
@@ -48,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void logout(){
-        firebase.unauth();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth.signOut();
         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
         startActivity(intent);
         finish();

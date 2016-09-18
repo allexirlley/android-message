@@ -1,6 +1,7 @@
 package tporto.com.message;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -8,26 +9,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
-import tporto.com.message.application.ConfiguracaoFirebase;
 import tporto.com.message.model.Usuario;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Firebase firebase;
     private EditText e_email, e_senha;
     private Button b_logar;
     private Usuario usuario;
+
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        firebase = ConfiguracaoFirebase.getFirebase();
+        firebaseAuth = FirebaseAuth.getInstance();
         verificarUsuarioLogado();
 
         e_email = (EditText) findViewById(R.id.e_email);
@@ -51,21 +53,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void validarLogin(){
-        firebase.authWithPassword(
-                usuario.getEmail(),
-                usuario.getSenha(),
-                new Firebase.AuthResultHandler() {
+        firebaseAuth.signInWithEmailAndPassword(usuario.getEmail(),usuario.getSenha())
+                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onAuthenticated(AuthData authData) {
-                        abrirTelaPrincipal();
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            abrirTelaPrincipal();
+                        }else{
+                            Toast.makeText(LoginActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
+                        }
                     }
-
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        Toast.makeText(LoginActivity.this,firebaseError.getMessage(),Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
+                });
     }
 
     private void abrirTelaPrincipal(){
@@ -75,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void verificarUsuarioLogado(){
-        if(firebase.getAuth() != null){
+        if(firebaseAuth.getCurrentUser() != null){
             abrirTelaPrincipal();
         }
     }
